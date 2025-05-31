@@ -135,16 +135,27 @@ export default function FeedbackForm() {
     try {
       setStatusMessage('Submitting feedback...');
       
-      // Simulate API call - in real app, send to backend
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Add random delay (30s-5min) to break time correlation with payment
+      const randomDelay = 30000 + Math.random() * 270000; // 30s to 5min
+      await new Promise(resolve => setTimeout(resolve, randomDelay));
       
       // TRUE ANONYMITY: Store feedback WITHOUT wallet address
+      // Generate random timestamp between 2022 and now for anonymity
+      const randomTimestamp = new Date(
+        2022 + Math.random() * (new Date().getFullYear() - 2022),
+        Math.floor(Math.random() * 12),
+        Math.floor(Math.random() * 28) + 1,
+        Math.floor(Math.random() * 24),
+        Math.floor(Math.random() * 60),
+        Math.floor(Math.random() * 60)
+      ).toISOString();
+      
       const feedbackData = {
         feedback: feedback.trim(),
         category: selectedCategory,
-        timestamp: new Date().toISOString(),
+        timestamp: randomTimestamp, // Randomized timestamp for anonymity
         paymentAmount: FEEDBACK_COST_MON,
-        id: crypto.randomUUID(), // Anonymous ID for tracking
+        id: crypto.randomUUID(), // Random UUID (already anonymous)
       };
       
       // Store anonymous feedback
@@ -156,7 +167,7 @@ export default function FeedbackForm() {
       const userHistory = {
         feedbackId: feedbackData.id,
         category: selectedCategory,
-        timestamp: feedbackData.timestamp,
+        timestamp: feedbackData.timestamp, // Use same random timestamp
         walletAddress: connectedWallet?.address,
       };
       
