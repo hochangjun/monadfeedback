@@ -86,9 +86,7 @@ export default function FeedbackForm() {
     checkPayment();
   }, [connectedWallet]);
 
-  const getSelectedCategory = (id: string) => {
-    return categories.find(cat => cat.id === id);
-  };
+
 
   const handlePayment = async () => {
     if (!connectedWallet) {

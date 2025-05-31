@@ -8,29 +8,10 @@ const FEEDBACK_PAYMENT_ABI = [
   "error NotOwner()"
 ];
 
-// Load contract address from deployment.json or environment
-let contractAddress: string | null = null;
-
-// Option 1: Try environment variable first
-if (typeof window === 'undefined') {
-  // Server-side: check environment variable
-  contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || null;
-}
-
-// Option 2: Try deployment.json if no env var
-if (!contractAddress) {
-  try {
-    const deploymentData = require('../../deployment.json');
-    contractAddress = deploymentData.contractAddress;
-  } catch (error) {
-    console.warn('deployment.json not found, using environment variable or simulated payment');
-  }
-}
-
-// Option 3: Client-side env var fallback
-if (!contractAddress && typeof window !== 'undefined') {
-  contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || null;
-}
+// Load contract address from environment or hardcoded fallback
+const contractAddress: string | null = 
+  (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_CONTRACT_ADDRESS) || 
+  '0x4610c9df4d3add1960b465138eb75183ba734381'; // Deployed contract address
 
 export const FEEDBACK_COST_WEI = ethers.utils.parseEther('5'); // 5 MON in wei
 
@@ -40,7 +21,7 @@ export interface PaymentResult {
   error?: string;
 }
 
-export async function makePayment(provider: any): Promise<PaymentResult> {
+export async function makePayment(provider: unknown): Promise<PaymentResult> {
   if (!contractAddress) {
     throw new Error('Contract not deployed yet. Please deploy the contract first.');
   }
@@ -70,25 +51,28 @@ export async function makePayment(provider: any): Promise<PaymentResult> {
       transactionHash: receipt.hash,
     };
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Payment error:', error);
     
     let errorMessage = 'Transaction failed';
     
     // Parse specific contract errors
-    if (error.reason) {
-      if (error.reason.includes('IncorrectAmount')) {
-        errorMessage = 'Insufficient payment amount. 5 MON required.';
-      } else {
-        errorMessage = error.reason;
-      }
-    } else if (error.message) {
-      if (error.message.includes('user rejected')) {
-        errorMessage = 'Transaction rejected by user';
-      } else if (error.message.includes('insufficient funds')) {
-        errorMessage = 'Insufficient MON balance';
-      } else {
-        errorMessage = error.message;
+    if (error && typeof error === 'object') {
+      const err = error as any;
+      if (err.reason) {
+        if (err.reason.includes('IncorrectAmount')) {
+          errorMessage = 'Insufficient payment amount. 5 MON required.';
+        } else {
+          errorMessage = err.reason;
+        }
+      } else if (err.message) {
+        if (err.message.includes('user rejected')) {
+          errorMessage = 'Transaction rejected by user';
+        } else if (err.message.includes('insufficient funds')) {
+          errorMessage = 'Insufficient MON balance';
+        } else {
+          errorMessage = err.message;
+        }
       }
     }
     
@@ -99,7 +83,7 @@ export async function makePayment(provider: any): Promise<PaymentResult> {
   }
 }
 
-export async function checkPaymentStatus(provider: any, userAddress: string): Promise<boolean> {
+export async function checkPaymentStatus(provider: unknown, userAddress: string): Promise<boolean> {
   if (!contractAddress) {
     return false; // No contract deployed, so no real payment possible
   }

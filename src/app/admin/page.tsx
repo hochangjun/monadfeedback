@@ -45,7 +45,7 @@ export default function AdminPage() {
     try {
       const storedFeedback = localStorage.getItem('monad-feedback');
       if (storedFeedback) {
-        const feedback: any[] = JSON.parse(storedFeedback);
+        const feedback: FeedbackEntry[] = JSON.parse(storedFeedback);
         
         // Convert legacy format to new format if needed
         const normalizedFeedback = feedback.map(item => ({

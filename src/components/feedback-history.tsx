@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useWallets } from '@privy-io/react-auth';
 import { Button } from '@/components/ui/button';
@@ -30,22 +30,14 @@ export default function FeedbackHistory() {
 
   const connectedWallet = wallets.find(wallet => wallet.address);
 
-  useEffect(() => {
-    if (authenticated && connectedWallet) {
-      loadFeedbackHistory();
-    } else {
-      setLoading(false);
-    }
-  }, [authenticated, connectedWallet]);
-
-  const loadFeedbackHistory = () => {
+  const loadFeedbackHistory = useCallback(() => {
     try {
       // Load user's submission history (new format)
       const userHistory = localStorage.getItem('user-submission-history');
       const allFeedback = localStorage.getItem('monad-feedback');
       
       if (allFeedback && connectedWallet?.address) {
-        const feedbackEntries: any[] = JSON.parse(allFeedback);
+        const feedbackEntries: (FeedbackEntry & {walletAddress?: string})[] = JSON.parse(allFeedback);
         let userFeedback: FeedbackEntry[] = [];
         
         if (userHistory) {
@@ -75,7 +67,15 @@ export default function FeedbackHistory() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [connectedWallet]);
+
+  useEffect(() => {
+    if (authenticated && connectedWallet) {
+      loadFeedbackHistory();
+    } else {
+      setLoading(false);
+    }
+  }, [authenticated, connectedWallet, loadFeedbackHistory]);
 
   const formatDate = (timestamp: string) => {
     return new Date(timestamp).toLocaleDateString('en-US', {
@@ -139,10 +139,10 @@ export default function FeedbackHistory() {
               No Feedback Yet
             </h3>
             <p className="text-gray-600 dark:text-gray-300 mb-4">
-              You haven't submitted any feedback yet. Share your thoughts on Monad Testnet applications!
+              You haven&apos;t submitted any feedback yet. Share your thoughts on Monad Testnet applications!
             </p>
             <Button onClick={() => window.location.reload()}>
-              Submit Your First Feedback
+                              Submit Your First Feedback
             </Button>
           </div>
         </div>
