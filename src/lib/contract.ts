@@ -8,19 +8,31 @@ const FEEDBACK_PAYMENT_ABI = [
   "error NotOwner()"
 ];
 
-// Load contract address from deployment.json
+// Load contract address from deployment.json or environment
 let contractAddress: string | null = null;
 
-try {
-  // In production, you'd fetch this from your backend or environment
-  // For now, we'll try to load from deployment.json if it exists
-  const deploymentData = require('../../deployment.json');
-  contractAddress = deploymentData.contractAddress;
-} catch (error) {
-  console.warn('deployment.json not found, using simulated payment');
+// Option 1: Try environment variable first
+if (typeof window === 'undefined') {
+  // Server-side: check environment variable
+  contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || null;
 }
 
-export const FEEDBACK_COST_WEI = ethers.utils.parseEther('0.1'); // 0.1 MON in wei
+// Option 2: Try deployment.json if no env var
+if (!contractAddress) {
+  try {
+    const deploymentData = require('../../deployment.json');
+    contractAddress = deploymentData.contractAddress;
+  } catch (error) {
+    console.warn('deployment.json not found, using environment variable or simulated payment');
+  }
+}
+
+// Option 3: Client-side env var fallback
+if (!contractAddress && typeof window !== 'undefined') {
+  contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || null;
+}
+
+export const FEEDBACK_COST_WEI = ethers.utils.parseEther('5'); // 5 MON in wei
 
 export interface PaymentResult {
   success: boolean;
@@ -34,10 +46,13 @@ export async function makePayment(provider: any): Promise<PaymentResult> {
   }
 
   try {
-    const signer = await provider.getSigner();
+    // Create ethers provider from the raw provider
+    const ethersProvider = new ethers.providers.Web3Provider(provider);
+    const signer = ethersProvider.getSigner();
+    
     const contract = new ethers.Contract(contractAddress, FEEDBACK_PAYMENT_ABI, signer);
     
-    // Call the pay function with 0.1 MON
+    // Call the pay function with 5 MON
     const tx = await contract.pay({ 
       value: FEEDBACK_COST_WEI,
       gasLimit: 100000 // Set reasonable gas limit
@@ -63,7 +78,7 @@ export async function makePayment(provider: any): Promise<PaymentResult> {
     // Parse specific contract errors
     if (error.reason) {
       if (error.reason.includes('IncorrectAmount')) {
-        errorMessage = 'Insufficient payment amount. 0.1 MON required.';
+        errorMessage = 'Insufficient payment amount. 5 MON required.';
       } else {
         errorMessage = error.reason;
       }
@@ -90,7 +105,9 @@ export async function checkPaymentStatus(provider: any, userAddress: string): Pr
   }
   
   try {
-    const contract = new ethers.Contract(contractAddress, FEEDBACK_PAYMENT_ABI, provider);
+    // Create ethers provider from the raw provider
+    const ethersProvider = new ethers.providers.Web3Provider(provider);
+    const contract = new ethers.Contract(contractAddress, FEEDBACK_PAYMENT_ABI, ethersProvider);
     return await contract.hasPaid(userAddress);
   } catch (error) {
     console.error('Error checking payment status:', error);

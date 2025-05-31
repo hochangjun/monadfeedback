@@ -4,21 +4,15 @@ import { useState, useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useWallets } from '@privy-io/react-auth';
 import { Button } from '@/components/ui/button';
-import { RATING_OPTIONS } from '@/lib/config';
+
 import { Calendar, Star, ExternalLink, AlertCircle } from 'lucide-react';
 
 interface FeedbackEntry {
-  projectName: string;
-  features: string;
-  workedWell: string;
-  didntWork: string;
-  improvements: string;
-  rating: number;
-  additional: string;
+  feedback: string;
+  category: string;
   walletAddress: string;
   timestamp: string;
   paymentAmount: string;
-  paymentStatus?: string;
 }
 
 export default function FeedbackHistory() {
@@ -67,10 +61,7 @@ export default function FeedbackHistory() {
     });
   };
 
-  const getRatingLabel = (rating: number) => {
-    const option = RATING_OPTIONS.find(opt => opt.value === rating);
-    return option ? option.label : 'Unknown';
-  };
+
 
   if (!authenticated) {
     return (
@@ -140,16 +131,15 @@ export default function FeedbackHistory() {
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                      {feedback.projectName}
+                      {feedback.category ? 
+                        feedback.category.charAt(0).toUpperCase() + feedback.category.slice(1).replace('_', ' ') : 
+                        'General Feedback'
+                      }
                     </h3>
                     <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
                       <div className="flex items-center space-x-1">
                         <Calendar className="h-4 w-4" />
                         <span>{formatDate(feedback.timestamp)}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Star className="h-4 w-4" />
-                        <span>{feedback.rating}/5 - {getRatingLabel(feedback.rating)}</span>
                       </div>
                     </div>
                   </div>
@@ -160,73 +150,21 @@ export default function FeedbackHistory() {
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-medium text-gray-900 dark:text-white mb-1">
-                        Features Tried
-                      </h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">
-                        {feedback.features}
-                      </p>
-                    </div>
-
-                    {feedback.workedWell && (
-                      <div>
-                        <h4 className="font-medium text-gray-900 dark:text-white mb-1">
-                          What Worked Well
-                        </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {feedback.workedWell}
-                        </p>
-                      </div>
-                    )}
-
-                    {feedback.didntWork && (
-                      <div>
-                        <h4 className="font-medium text-gray-900 dark:text-white mb-1">
-                          Issues Encountered
-                        </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {feedback.didntWork}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-4">
-                    {feedback.improvements && (
-                      <div>
-                        <h4 className="font-medium text-gray-900 dark:text-white mb-1">
-                          Suggested Improvements
-                        </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {feedback.improvements}
-                        </p>
-                      </div>
-                    )}
-
-
-
-                    {feedback.additional && (
-                      <div>
-                        <h4 className="font-medium text-gray-900 dark:text-white mb-1">
-                          Additional Comments
-                        </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {feedback.additional}
-                        </p>
-                      </div>
-                    )}
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium text-gray-900 dark:text-white mb-1">
+                      Feedback
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap">
+                      {feedback.feedback}
+                    </p>
                   </div>
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
                     <div className="flex items-center space-x-4">
-                      {feedback.paymentStatus && (
-                        <span>Payment: {feedback.paymentStatus}</span>
-                      )}
+                      <span>Anonymous feedback</span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <ExternalLink className="h-3 w-3" />

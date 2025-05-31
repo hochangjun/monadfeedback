@@ -1,0 +1,7 @@
+{
+  "contractAddress": "0x4610c9df4d3add1960b465138eb75183ba734381",
+  "network": "monadTestnet",
+  "chainId": 10143,
+  "deploymentMethod": "remix",
+  "deploymentTime": "2024-05-31T16:30:00.000Z"
+} 
