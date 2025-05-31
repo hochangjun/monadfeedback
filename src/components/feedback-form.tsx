@@ -24,6 +24,12 @@ const categories = [
     icon: '🎯'
   },
   {
+    id: 'apps',
+    label: 'Apps & DApps',
+    description: 'Decentralized applications, smart contracts, app functionality',
+    icon: '📱'
+  },
+  {
     id: 'ideas_requests',
     label: 'Ideas & Requests',
     description: 'Feature suggestions, improvements, new concepts',
@@ -134,18 +140,31 @@ export default function FeedbackForm() {
       // Simulate API call - in real app, send to backend
       await new Promise(resolve => setTimeout(resolve, 1500));
       
+      // TRUE ANONYMITY: Store feedback WITHOUT wallet address
       const feedbackData = {
         feedback: feedback.trim(),
         category: selectedCategory,
-        walletAddress: connectedWallet?.address,
         timestamp: new Date().toISOString(),
         paymentAmount: FEEDBACK_COST_MON,
+        id: crypto.randomUUID(), // Anonymous ID for tracking
       };
       
-      // Store in localStorage for demo
+      // Store anonymous feedback
       const existingFeedback = JSON.parse(localStorage.getItem('monad-feedback') || '[]');
       existingFeedback.push(feedbackData);
       localStorage.setItem('monad-feedback', JSON.stringify(existingFeedback));
+      
+      // Track user's submissions separately (for history view)
+      const userHistory = {
+        feedbackId: feedbackData.id,
+        category: selectedCategory,
+        timestamp: feedbackData.timestamp,
+        walletAddress: connectedWallet?.address,
+      };
+      
+      const existingHistory = JSON.parse(localStorage.getItem('user-submission-history') || '[]');
+      existingHistory.push(userHistory);
+      localStorage.setItem('user-submission-history', JSON.stringify(existingHistory));
       
       setShowSuccessModal(true);
       setFeedback('');

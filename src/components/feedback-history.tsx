@@ -10,9 +10,16 @@ import { Calendar, Star, ExternalLink, AlertCircle } from 'lucide-react';
 interface FeedbackEntry {
   feedback: string;
   category: string;
-  walletAddress: string;
   timestamp: string;
   paymentAmount: string;
+  id: string;
+}
+
+interface UserHistory {
+  feedbackId: string;
+  category: string;
+  timestamp: string;
+  walletAddress: string;
 }
 
 export default function FeedbackHistory() {
@@ -33,13 +40,32 @@ export default function FeedbackHistory() {
 
   const loadFeedbackHistory = () => {
     try {
-      const storedFeedback = localStorage.getItem('monad-feedback');
-      if (storedFeedback) {
-        const allFeedback: FeedbackEntry[] = JSON.parse(storedFeedback);
-        // Filter feedback for current wallet
-        const userFeedback = allFeedback.filter(
-          feedback => feedback.walletAddress.toLowerCase() === connectedWallet?.address.toLowerCase()
-        );
+      // Load user's submission history (new format)
+      const userHistory = localStorage.getItem('user-submission-history');
+      const allFeedback = localStorage.getItem('monad-feedback');
+      
+      if (allFeedback && connectedWallet?.address) {
+        const feedbackEntries: any[] = JSON.parse(allFeedback);
+        let userFeedback: FeedbackEntry[] = [];
+        
+        if (userHistory) {
+          // New anonymous format
+          const userSubmissions: UserHistory[] = JSON.parse(userHistory);
+          const userFeedbackIds = userSubmissions
+            .filter(submission => submission.walletAddress.toLowerCase() === connectedWallet.address.toLowerCase())
+            .map(submission => submission.feedbackId);
+          
+          userFeedback = feedbackEntries.filter(feedback => 
+            feedback.id && userFeedbackIds.includes(feedback.id)
+          );
+        } else {
+          // Legacy format - fallback for old data
+          userFeedback = feedbackEntries.filter(feedback => 
+            feedback.walletAddress && 
+            feedback.walletAddress.toLowerCase() === connectedWallet.address.toLowerCase()
+          );
+        }
+        
         // Sort by timestamp (newest first)
         userFeedback.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
         setFeedbackHistory(userFeedback);
@@ -168,7 +194,7 @@ export default function FeedbackHistory() {
                     </div>
                     <div className="flex items-center space-x-1">
                       <ExternalLink className="h-3 w-3" />
-                      <span>Wallet: {feedback.walletAddress.slice(0, 6)}...{feedback.walletAddress.slice(-4)}</span>
+                      <span>Feedback ID: {feedback.id ? feedback.id.slice(0, 8) : 'legacy'}</span>
                     </div>
                   </div>
                 </div>

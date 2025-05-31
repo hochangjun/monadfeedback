@@ -7,9 +7,9 @@ import { Button } from '@/components/ui/button';
 interface FeedbackEntry {
   feedback: string;
   category: string;
-  walletAddress: string;
   timestamp: string;
   paymentAmount: string;
+  id: string;
 }
 
 export default function AdminPage() {
@@ -21,7 +21,8 @@ export default function AdminPage() {
   const categories = [
     'all',
     'speed_performance',
-    'ease_of_use', 
+    'ease_of_use',
+    'apps', 
     'ideas_requests',
     'community_support',
     'developer_experience',
@@ -44,11 +45,18 @@ export default function AdminPage() {
     try {
       const storedFeedback = localStorage.getItem('monad-feedback');
       if (storedFeedback) {
-        const feedback: FeedbackEntry[] = JSON.parse(storedFeedback);
+        const feedback: any[] = JSON.parse(storedFeedback);
+        
+        // Convert legacy format to new format if needed
+        const normalizedFeedback = feedback.map(item => ({
+          ...item,
+          id: item.id || `legacy-${Date.now()}-${Math.random()}`, // Generate ID for legacy entries
+        }));
+        
         // Sort by timestamp (newest first)
-        feedback.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-        setAllFeedback(feedback);
-        setFilteredFeedback(feedback);
+        normalizedFeedback.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        setAllFeedback(normalizedFeedback);
+        setFilteredFeedback(normalizedFeedback);
       }
     } catch (error) {
       console.error('Error loading feedback:', error);
@@ -73,7 +81,7 @@ export default function AdminPage() {
   };
 
   const exportToCSV = () => {
-    const headers = ['Timestamp', 'Category', 'Feedback', 'Payment Amount', 'Wallet (Last 4)'];
+    const headers = ['Timestamp', 'Category', 'Feedback', 'Payment Amount', 'Feedback ID'];
     const csvContent = [
       headers.join(','),
       ...filteredFeedback.map(feedback => [
@@ -81,7 +89,7 @@ export default function AdminPage() {
         `"${formatCategory(feedback.category)}"`,
         `"${feedback.feedback.replace(/"/g, '""')}"`,
         feedback.paymentAmount,
-        feedback.walletAddress.slice(-4)
+        feedback.id ? feedback.id.slice(0, 8) : 'legacy'
       ].join(','))
     ].join('\n');
 
@@ -192,10 +200,10 @@ export default function AdminPage() {
                         <Calendar className="h-4 w-4" />
                         <span>{formatDate(feedback.timestamp)}</span>
                       </div>
-                      <span>•</span>
-                      <span>Payment: {feedback.paymentAmount} MON</span>
-                      <span>•</span>
-                      <span>Wallet: ...{feedback.walletAddress.slice(-4)}</span>
+                                             <span>•</span>
+                       <span>Payment: {feedback.paymentAmount} MON</span>
+                       <span>•</span>
+                       <span>ID: {feedback.id ? feedback.id.slice(0, 8) : 'legacy'}</span>
                     </div>
                   </div>
                 </div>
