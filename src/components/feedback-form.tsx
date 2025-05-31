@@ -66,8 +66,16 @@ export default function FeedbackForm() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [statusMessage, setStatusMessage] = useState('');
+  const [countdown, setCountdown] = useState<number | null>(null);
 
   const connectedWallet = wallets.find(wallet => wallet.address);
+
+  // Format countdown time
+  const formatCountdown = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   // Check payment status on wallet connect
   useEffect(() => {
@@ -133,11 +141,28 @@ export default function FeedbackForm() {
     setStatusMessage('');
 
     try {
-      setStatusMessage('Submitting feedback...');
-      
       // Add random delay (30s-5min) to break time correlation with payment
       const randomDelay = 30000 + Math.random() * 270000; // 30s to 5min
+      
+      // Start countdown
+      setCountdown(Math.ceil(randomDelay / 1000)); // Convert to seconds
+      setStatusMessage('🔒 Anonymizing submission for privacy protection...');
+      
+      // Countdown timer
+      const countdownInterval = setInterval(() => {
+        setCountdown(prev => {
+          if (prev && prev > 1) {
+            return prev - 1;
+          } else {
+            clearInterval(countdownInterval);
+            return null;
+          }
+        });
+      }, 1000);
+      
       await new Promise(resolve => setTimeout(resolve, randomDelay));
+      
+      setStatusMessage('✅ Finalizing anonymous submission...');
       
       // TRUE ANONYMITY: Store feedback WITHOUT wallet address
       // Generate random timestamp between 2022 and now for anonymity
@@ -179,10 +204,12 @@ export default function FeedbackForm() {
       setFeedback('');
       setSelectedCategory('');
       setSubmitStatus('success');
+      setCountdown(null);
       
     } catch (error) {
       setSubmitStatus('error');
       setStatusMessage(`Submission failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setCountdown(null);
     } finally {
       setIsSubmitLoading(false);
     }
@@ -341,7 +368,7 @@ export default function FeedbackForm() {
               {isSubmitLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
+                  Anonymizing...
                 </>
               ) : (
                 `Submit Anonymous Feedback (${FEEDBACK_COST_MON} MON)`
@@ -353,21 +380,39 @@ export default function FeedbackForm() {
               <div className={`p-4 rounded-md ${
                 submitStatus === 'success' 
                   ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' 
+                  : countdown !== null
+                  ? 'bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800'
                   : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
               }`}>
-                <div className="flex items-center">
-                  {submitStatus === 'success' ? (
-                    <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
-                  ) : (
-                    <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-2" />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    {submitStatus === 'success' ? (
+                      <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
+                    ) : countdown !== null ? (
+                      <Loader2 className="h-5 w-5 text-purple-600 dark:text-purple-400 mr-2 animate-spin" />
+                    ) : (
+                      <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-2" />
+                    )}
+                    <p className={`text-sm ${
+                      submitStatus === 'success' 
+                        ? 'text-green-800 dark:text-green-200' 
+                        : countdown !== null
+                        ? 'text-purple-800 dark:text-purple-200'
+                        : 'text-red-800 dark:text-red-200'
+                    }`}>
+                      {statusMessage}
+                    </p>
+                  </div>
+                  {countdown !== null && (
+                    <div className="text-right">
+                      <div className="text-2xl font-mono font-bold text-purple-600 dark:text-purple-400">
+                        {formatCountdown(countdown)}
+                      </div>
+                      <div className="text-xs text-purple-500 dark:text-purple-400">
+                        remaining
+                      </div>
+                    </div>
                   )}
-                  <p className={`text-sm ${
-                    submitStatus === 'success' 
-                      ? 'text-green-800 dark:text-green-200' 
-                      : 'text-red-800 dark:text-red-200'
-                  }`}>
-                    {statusMessage}
-                  </p>
                 </div>
               </div>
             )}
@@ -378,6 +423,9 @@ export default function FeedbackForm() {
               <p>
                 Your feedback is encrypted and shuffled with others.
                 No correlation between your wallet and feedback content.
+              </p>
+              <p className="text-purple-600 dark:text-purple-400 font-medium">
+                ⏱️ Submissions are delayed 30s-5min to prevent timing correlation attacks
               </p>
             </div>
           </div>
