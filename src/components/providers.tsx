@@ -18,10 +18,26 @@ const config = createConfig({
 const queryClient = new QueryClient();
 
 export default function Providers({ children }: { children: React.ReactNode }) {
+  const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
+  
+  if (!privyAppId) {
+    console.error('NEXT_PUBLIC_PRIVY_APP_ID is not set');
+    return (
+      <ThemeProvider defaultTheme="system" storageKey="monad-feedback-theme">
+        <div className="min-h-screen flex items-center justify-center bg-red-50">
+          <div className="text-center p-8 bg-white rounded-lg shadow-lg">
+            <h1 className="text-2xl font-bold text-red-600 mb-4">Configuration Error</h1>
+            <p className="text-gray-600">Missing Privy App ID. Please check environment variables.</p>
+          </div>
+        </div>
+      </ThemeProvider>
+    );
+  }
+
   return (
     <ThemeProvider defaultTheme="system" storageKey="monad-feedback-theme">
               <PrivyProvider
-          appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
+          appId={privyAppId}
           config={{
             // Display only wallet as login method
             loginMethods: ['wallet'],
