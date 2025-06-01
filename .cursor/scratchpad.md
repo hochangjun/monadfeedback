@@ -4,7 +4,7 @@
 Building a feedback form similar to the mega feedback form for Monad Testnet applications. Users need to connect wallet and pay 0.1 MON to submit feedback (spam prevention). The form will collect detailed feedback about Monad Testnet applications and show user feedback history.
 
 ## Key Challenges and Analysis
-- Wallet connection with Privy (App ID: cmbcf5c2m0127l10nesxsms50)
+- Wallet connection with Privy (configured via environment variables)
 - Monad Testnet integration (Chain ID: 10143, auto network switching)
 - Payment system (0.1 MON required to submit)
 - Form validation and data storage

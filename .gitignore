@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -60,3 +61,31 @@ ignition/deployments/chain-31337
 
 # Feedback data storage
 /data
+
+# Security & sensitive files
+*.key
+*.pem
+.secrets
+secrets.*
+.private
+private.*
+.secret
+secret.*
+
+# Logs
+logs
+*.log
+log.*
+
+# IDE specific files
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+temp.*
+tmp.*

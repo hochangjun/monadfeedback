@@ -2,6 +2,8 @@
 
 A feedback collection platform for Monad Testnet applications with smart contract-based payment verification to prevent spam.
 
+> **Note:** This project is forked from [mega-feedback](https://github.com/mega-feedback/mega-feedback) and adapted for the Monad ecosystem.
+
 ## Features
 
 - 🌐 **Monad Testnet Integration** - Built specifically for Monad blockchain
@@ -132,9 +134,12 @@ npm run build
 # Required for contract deployment
 PRIVATE_KEY=your_private_key_here
 
-# Privy configuration
-NEXT_PUBLIC_PRIVY_APP_ID=your_app_id_here
-PRIVY_APP_SECRET=your_secret_here
+# Privy configuration (sign up at https://privy.io)
+NEXT_PUBLIC_PRIVY_APP_ID=your_privy_app_id_here
+PRIVY_APP_SECRET=your_privy_app_secret_here
+
+# Database configuration (for production deployment)
+DATABASE_URL=your_postgresql_url_here
 ```
 
 ## Contributing
@@ -148,6 +153,23 @@ PRIVY_APP_SECRET=your_secret_here
 ## License
 
 MIT License - see LICENSE file for details.
+
+## Security
+
+⚠️ **Important Security Notes:**
+
+- **Never commit private keys or secrets** to version control
+- Use environment variables for all sensitive configuration
+- The `.env.example` file provides templates - copy to `.env` and fill with your actual values
+- Always verify your `.gitignore` is working before committing
+- For production deployment, use secure environment variable management (e.g., Vercel's environment variables)
+
+### Environment Variables Setup
+1. Copy `env.example` to `.env`
+2. Fill in your actual values:
+   - Get `PRIVATE_KEY` from your wallet (for contract deployment only)
+   - Create a Privy account at https://privy.io for the Privy variables
+   - Set up a PostgreSQL database (like Neon) for `DATABASE_URL`
 
 ## Support
 
