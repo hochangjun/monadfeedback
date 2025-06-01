@@ -41,7 +41,68 @@ export default function AdminPage() {
     }
   }, [allFeedback, selectedCategory]);
 
-  const loadAllFeedback = () => {
+  const loadAllFeedback = async () => {
+    try {
+      // First, try to migrate any existing localStorage data
+      await migrateLocalData();
+      
+      // Load from server (Neon PostgreSQL for Vercel)
+      const response = await fetch('/api/feedback-neon');
+      if (response.ok) {
+        const { feedback } = await response.json();
+        
+        // Convert legacy format to new format if needed
+        const normalizedFeedback = feedback.map((item: any) => ({
+          ...item,
+          id: item.id || `legacy-${Date.now()}-${Math.random()}`, // Generate ID for legacy entries
+        }));
+        
+        // Sort by timestamp (newest first)
+        normalizedFeedback.sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        setAllFeedback(normalizedFeedback);
+        setFilteredFeedback(normalizedFeedback);
+      } else {
+        console.error('Failed to load feedback from server');
+        // Fallback to localStorage
+        loadLocalFeedback();
+      }
+    } catch (error) {
+      console.error('Error loading feedback:', error);
+      // Fallback to localStorage
+      loadLocalFeedback();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const migrateLocalData = async () => {
+    try {
+      const localFeedback = localStorage.getItem('monad-feedback');
+      const localHistory = localStorage.getItem('user-submission-history');
+      
+      if (localFeedback || localHistory) {
+        const response = await fetch('/api/migrate-neon', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            feedback: localFeedback ? JSON.parse(localFeedback) : [],
+            userHistory: localHistory ? JSON.parse(localHistory) : []
+          })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Migration successful:', result);
+        }
+      }
+    } catch (error) {
+      console.error('Migration failed:', error);
+    }
+  };
+
+  const loadLocalFeedback = () => {
     try {
       const storedFeedback = localStorage.getItem('monad-feedback');
       if (storedFeedback) {
@@ -59,9 +120,7 @@ export default function AdminPage() {
         setFilteredFeedback(normalizedFeedback);
       }
     } catch (error) {
-      console.error('Error loading feedback:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error loading local feedback:', error);
     }
   };
 
@@ -120,7 +179,7 @@ export default function AdminPage() {
             <span className="text-purple-400"> ADMIN</span>
           </h1>
           <p className="text-xl text-gray-300 font-mono max-w-2xl mx-auto">
-            View and manage all submitted Monad Testnet feedback
+            View all submitted Monad Testnet feedback
           </p>
         </div>
 

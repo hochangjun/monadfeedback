@@ -67,6 +67,7 @@ export default function FeedbackForm() {
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [statusMessage, setStatusMessage] = useState('');
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [showMigrationNotice, setShowMigrationNotice] = useState(false);
 
   const connectedWallet = wallets.find(wallet => wallet.address);
 
@@ -77,7 +78,7 @@ export default function FeedbackForm() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Check payment status on wallet connect
+  // Check payment status and migration on wallet connect
   useEffect(() => {
     const checkPayment = async () => {
       if (connectedWallet?.address) {
@@ -91,7 +92,17 @@ export default function FeedbackForm() {
       }
     };
 
+    const checkMigration = () => {
+      const localFeedback = localStorage.getItem('monad-feedback');
+      const localHistory = localStorage.getItem('user-submission-history');
+      if ((localFeedback && JSON.parse(localFeedback).length > 0) || 
+          (localHistory && JSON.parse(localHistory).length > 0)) {
+        setShowMigrationNotice(true);
+      }
+    };
+
     checkPayment();
+    checkMigration();
   }, [connectedWallet]);
 
 
@@ -183,11 +194,6 @@ export default function FeedbackForm() {
         id: crypto.randomUUID(), // Random UUID (already anonymous)
       };
       
-      // Store anonymous feedback
-      const existingFeedback = JSON.parse(localStorage.getItem('monad-feedback') || '[]');
-      existingFeedback.push(feedbackData);
-      localStorage.setItem('monad-feedback', JSON.stringify(existingFeedback));
-      
       // Track user's submissions separately (for history view)
       const userHistory = {
         feedbackId: feedbackData.id,
@@ -195,6 +201,27 @@ export default function FeedbackForm() {
         timestamp: feedbackData.timestamp, // Use same random timestamp
         walletAddress: connectedWallet?.address,
       };
+      
+      // Save to server (shared across all devices) - Neon PostgreSQL for Vercel
+      const response = await fetch('/api/feedback-neon', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          feedback: feedbackData,
+          userHistory: userHistory
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save feedback to server');
+      }
+      
+      // Also keep in localStorage as backup
+      const existingFeedback = JSON.parse(localStorage.getItem('monad-feedback') || '[]');
+      existingFeedback.push(feedbackData);
+      localStorage.setItem('monad-feedback', JSON.stringify(existingFeedback));
       
       const existingHistory = JSON.parse(localStorage.getItem('user-submission-history') || '[]');
       existingHistory.push(userHistory);
@@ -279,6 +306,33 @@ export default function FeedbackForm() {
           </div>
 
           <div className="p-6 space-y-6">
+            {/* Migration Notice */}
+            {showMigrationNotice && (
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="ml-3 flex-1">
+                    <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                      Data Migration Available
+                    </h3>
+                    <p className="mt-1 text-sm text-blue-700 dark:text-blue-300">
+                      We've upgraded to a shared feedback system! Your existing feedback will be automatically migrated to the new system when you visit the admin page or submit new feedback.
+                    </p>
+                    <div className="mt-3">
+                      <button
+                        onClick={() => setShowMigrationNotice(false)}
+                        className="text-sm font-medium text-blue-800 dark:text-blue-200 hover:text-blue-900 dark:hover:text-blue-100"
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Payment Status */}
             {!hasPaid && (
               <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">

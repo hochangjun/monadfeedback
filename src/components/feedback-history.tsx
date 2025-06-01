@@ -30,7 +30,63 @@ export default function FeedbackHistory() {
 
   const connectedWallet = wallets.find(wallet => wallet.address);
 
-  const loadFeedbackHistory = useCallback(() => {
+  const loadFeedbackHistory = useCallback(async () => {
+    try {
+      if (!connectedWallet?.address) {
+        setLoading(false);
+        return;
+      }
+
+      // Try to load from server first (Neon PostgreSQL for Vercel)
+      const response = await fetch('/api/feedback-neon');
+      if (response.ok) {
+        const { feedback: allFeedback, userHistory: serverUserHistory } = await response.json();
+        
+        if (allFeedback && connectedWallet?.address) {
+          let userFeedback: FeedbackEntry[] = [];
+          
+          // Check server user history first
+          if (serverUserHistory && serverUserHistory.length > 0) {
+            const userFeedbackIds = serverUserHistory
+              .filter((submission: UserHistory) => submission.walletAddress.toLowerCase() === connectedWallet.address.toLowerCase())
+              .map((submission: UserHistory) => submission.feedbackId);
+            
+            userFeedback = allFeedback.filter((feedback: FeedbackEntry) => 
+              feedback.id && userFeedbackIds.includes(feedback.id)
+            );
+          }
+          
+          // Fallback to localStorage for any missing data
+          const localUserHistory = localStorage.getItem('user-submission-history');
+          if (localUserHistory && userFeedback.length === 0) {
+            const userSubmissions: UserHistory[] = JSON.parse(localUserHistory);
+            const userFeedbackIds = userSubmissions
+              .filter(submission => submission.walletAddress.toLowerCase() === connectedWallet.address.toLowerCase())
+              .map(submission => submission.feedbackId);
+            
+            userFeedback = allFeedback.filter((feedback: FeedbackEntry) => 
+              feedback.id && userFeedbackIds.includes(feedback.id)
+            );
+          }
+          
+          // Sort by timestamp (newest first)
+          userFeedback.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+          setFeedbackHistory(userFeedback);
+        }
+      } else {
+        // Fallback to localStorage
+        loadLocalFeedbackHistory();
+      }
+    } catch (error) {
+      console.error('Error loading feedback history:', error);
+      // Fallback to localStorage
+      loadLocalFeedbackHistory();
+    } finally {
+      setLoading(false);
+    }
+  }, [connectedWallet]);
+
+  const loadLocalFeedbackHistory = () => {
     try {
       // Load user's submission history (new format)
       const userHistory = localStorage.getItem('user-submission-history');
@@ -63,11 +119,9 @@ export default function FeedbackHistory() {
         setFeedbackHistory(userFeedback);
       }
     } catch (error) {
-      console.error('Error loading feedback history:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error loading local feedback history:', error);
     }
-  }, [connectedWallet]);
+  };
 
   useEffect(() => {
     if (authenticated && connectedWallet) {
