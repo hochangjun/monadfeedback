@@ -133,7 +133,7 @@ npm run build
 PRIVATE_KEY=your_private_key_here
 
 # Privy configuration
-NEXT_PUBLIC_PRIVY_APP_ID=cmbcf5c2m0127l10nesxsms50
+NEXT_PUBLIC_PRIVY_APP_ID=your_app_id_here
 PRIVY_APP_SECRET=your_secret_here
 ```
 
