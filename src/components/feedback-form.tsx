@@ -274,8 +274,7 @@ export default function FeedbackForm() {
             <span className="text-muted-foreground"> FEEDBACK</span>
           </h1>
           <p className="text-xl text-muted-foreground font-mono max-w-2xl mx-auto">
-            Share your honest thoughts about Monad Testnet. Pay once, submit <b>anonymously.</b>
-            Your identity stays completely private.
+            Share your thoughts about Monad Testnet apps. Pay once, choose to submit <b>anonymously</b> or <b>publicly</b>.
           </p>
         </div>
 
@@ -308,33 +307,7 @@ export default function FeedbackForm() {
             )}
           </div>
 
-          <div className="p-6 space-y-6">
-            {/* Migration Notice */}
-            {showMigrationNotice && (
-              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div className="ml-3 flex-1">
-                    <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                      Data Migration Available
-                    </h3>
-                    <p className="mt-1 text-sm text-blue-700 dark:text-blue-300">
-                      We've upgraded to a shared feedback system! Your existing feedback will be automatically migrated to the new system when you visit the admin page or submit new feedback.
-                    </p>
-                    <div className="mt-3">
-                      <button
-                        onClick={() => setShowMigrationNotice(false)}
-                        className="text-sm font-medium text-blue-800 dark:text-blue-200 hover:text-blue-900 dark:hover:text-blue-100"
-                      >
-                        Dismiss
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+
 
             {/* Payment Status */}
             {!hasPaid && (
