@@ -4,12 +4,17 @@ import { sql, initDatabase } from '@/lib/db';
 // Get feedback data from PostgreSQL
 export async function GET() {
   try {
+    // Check if database is available
+    if (!sql) {
+      return NextResponse.json({ 
+        feedback: [], 
+        userHistory: [],
+        note: 'Database not configured - using localStorage fallback' 
+      });
+    }
+    
     // Ensure database is initialized
     await initDatabase();
-    
-    if (!sql) {
-      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
-    }
     
     // Get all feedback (anonymous)
     const feedback = await sql`
@@ -45,14 +50,20 @@ export async function GET() {
 // Add new feedback to PostgreSQL
 export async function POST(request: NextRequest) {
   try {
-    // Ensure database is initialized
-    await initDatabase();
+    const { feedback: newFeedback, userHistory: newHistory } = await request.json();
     
+    // Check if database is available
     if (!sql) {
-      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+      console.log('Database not available, feedback will be saved to localStorage only');
+      return NextResponse.json({ 
+        success: true, 
+        note: 'Saved to localStorage - configure DATABASE_URL for persistent storage',
+        fallback: true
+      });
     }
     
-    const { feedback: newFeedback, userHistory: newHistory } = await request.json();
+    // Ensure database is initialized
+    await initDatabase();
     
     if (newFeedback) {
       // Insert feedback
@@ -98,6 +109,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error saving to database:', error);
-    return NextResponse.json({ error: 'Failed to save feedback' }, { status: 500 });
+    return NextResponse.json({ 
+      success: false, 
+      error: 'Failed to save feedback to database',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 } 

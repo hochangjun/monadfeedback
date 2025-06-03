@@ -216,8 +216,15 @@ export default function FeedbackForm() {
         })
       });
       
+      const result = await response.json();
+      
       if (!response.ok) {
-        throw new Error('Failed to save feedback to server');
+        throw new Error(result.error || 'Failed to save feedback to server');
+      }
+      
+      // Check if using fallback storage
+      if (result.fallback) {
+        setStatusMessage('✅ Feedback saved locally (database not configured)');
       }
       
       // Also keep in localStorage as backup
