@@ -9,7 +9,7 @@ export default function Home() {
   const [currentView, setCurrentView] = useState<'form' | 'history'>('form');
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gradient-to-br dark:from-purple-950 dark:via-slate-900 dark:to-purple-900">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100 dark:bg-gradient-to-br dark:from-purple-950 dark:via-slate-900 dark:to-purple-900">
       <Header currentView={currentView} onViewChange={setCurrentView} />
       <main className="py-8">
         {currentView === 'form' ? <FeedbackForm /> : <FeedbackHistory />}
