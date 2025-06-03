@@ -16,18 +16,39 @@ export async function GET() {
     // Ensure database is initialized
     await initDatabase();
     
-    // Get all feedback (anonymous)
-    const feedback = await sql`
-      SELECT 
-        id,
-        feedback_text as feedback,
-        category,
-        x_handle as "xHandle",
-        payment_amount as "paymentAmount",
-        anonymous_timestamp as timestamp
-      FROM feedback 
-      ORDER BY anonymous_timestamp DESC
-    `;
+    // Get all feedback (anonymous) - backward compatible
+    let feedback;
+    try {
+      // Try with x_handle column first
+      feedback = await sql`
+        SELECT 
+          id,
+          feedback_text as feedback,
+          category,
+          x_handle as "xHandle",
+          payment_amount as "paymentAmount",
+          anonymous_timestamp as timestamp
+        FROM feedback 
+        ORDER BY anonymous_timestamp DESC
+      `;
+    } catch (error) {
+      // If x_handle column doesn't exist, query without it
+      if (error instanceof Error && error.message.includes('x_handle')) {
+        feedback = await sql`
+          SELECT 
+            id,
+            feedback_text as feedback,
+            category,
+            NULL as "xHandle",
+            payment_amount as "paymentAmount",
+            anonymous_timestamp as timestamp
+          FROM feedback 
+          ORDER BY anonymous_timestamp DESC
+        `;
+      } else {
+        throw error;
+      }
+    }
     
     // Get user history (separate from feedback for anonymity)
     const userHistory = await sql`
