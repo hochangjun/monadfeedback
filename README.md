@@ -8,7 +8,7 @@ A feedback collection platform for Monad Testnet applications with smart contrac
 
 - 🌐 **Monad Testnet Integration** - Built specifically for Monad blockchain
 - 🔗 **Wallet Authentication** - Privy-powered wallet connection
-- 💰 **Smart Contract Payment** - 0.1 MON payment required to submit feedback
+- 💰 **Smart Contract Payment** - 1.1 MON payment required to submit feedback
 - 🎨 **Modern UI** - Beautiful dark/light mode interface with purple theme
 - 📱 **Responsive Design** - Works on desktop and mobile
 - 📊 **Feedback History** - View all your submitted feedback
@@ -59,14 +59,14 @@ contract FeedbackPayment {
     mapping(address => bool) public hasPaid;
     
     function pay() external payable {
-        require(msg.value >= 0.1 ether, "Insufficient payment");
+        require(msg.value >= 1.1 ether, "Insufficient payment");
         hasPaid[msg.sender] = true;
     }
 }
 ```
 
 ### Contract Features
-- Requires exactly 0.1 MON payment
+- Requires exactly 1.1 MON payment
 - Tracks payment status per address
 - Owner can withdraw collected funds
 - Prevents spam through economic incentive

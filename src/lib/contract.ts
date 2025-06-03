@@ -11,7 +11,7 @@ const FEEDBACK_PAYMENT_ABI = [
 // Load contract address from environment or hardcoded fallback
 const contractAddress: string | null = 
   (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_CONTRACT_ADDRESS) || 
-  '0x4610c9df4d3add1960b465138eb75183ba734381'; // Deployed contract address
+  '0x8f70dab45234aefc388a2d2df2144e2ae6bbb8d8'; // Deployed contract address
 
 export const FEEDBACK_COST_WEI = ethers.utils.parseEther('5'); // 5 MON in wei
 
@@ -61,7 +61,7 @@ export async function makePayment(provider: unknown): Promise<PaymentResult> {
       const err = error as any;
       if (err.reason) {
         if (err.reason.includes('IncorrectAmount')) {
-          errorMessage = 'Insufficient payment amount. 5 MON required.';
+          errorMessage = 'Insufficient payment amount. 1.1 MON required.';
         } else {
           errorMessage = err.reason;
         }

@@ -1,4 +1,4 @@
-require("@nomicfoundation/hardhat-toolbox");
+require("@nomiclabs/hardhat-ethers");
 require("dotenv").config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
@@ -11,20 +11,4 @@ module.exports = {
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
     },
   },
-  etherscan: {
-    // Monad testnet doesn't have etherscan yet, but keeping structure for future
-    apiKey: {
-      monadTestnet: "dummy-key",
-    },
-    customChains: [
-      {
-        network: "monadTestnet",
-        chainId: 10143,
-        urls: {
-          apiURL: "https://testnet-rpc.monad.xyz",
-          browserURL: "https://testnet-explorer.monad.xyz"
-        }
-      }
-    ]
-  }
 };

@@ -13,7 +13,7 @@ contract FeedbackPayment {
     }
  
     function pay() external payable {
-        if (msg.value < 5 ether){
+        if (msg.value < 1.1 ether){
             revert IncorrectAmount();
         }
         hasPaid[msg.sender] = true;

@@ -27,8 +27,8 @@ export const monadTestnet = defineChain({
 });
 
 // App constants
-export const FEEDBACK_COST_MON = '5'; // 0.1 MON required to submit feedback
-export const FEEDBACK_COST_WEI = BigInt('5000000000000000000'); // 5 MON in wei
+export const FEEDBACK_COST_MON = '1.1'; // 1.1 MON required to submit feedback
+export const FEEDBACK_COST_WEI = BigInt('1100000000000000000'); // 1.1 MON in wei
 
 // Project options for the feedback form
 export const PROJECT_OPTIONS = [
