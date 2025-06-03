@@ -42,8 +42,13 @@ export async function GET() {
     
     return NextResponse.json({ feedback, userHistory });
   } catch (error) {
-    console.error('Error reading from database:', error);
-    return NextResponse.json({ error: 'Failed to read feedback' }, { status: 500 });
+    console.error('Database error details:', error);
+    // Return more specific error information
+    return NextResponse.json({ 
+      error: 'Database query failed',
+      details: error instanceof Error ? error.message : 'Unknown error',
+      hasDatabase: !!sql
+    }, { status: 500 });
   }
 }
 
