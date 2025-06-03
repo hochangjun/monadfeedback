@@ -19,6 +19,7 @@ A feedback collection platform for Monad Testnet applications with smart contrac
 - **Frontend**: Next.js 15, TypeScript, Tailwind CSS
 - **Authentication**: Privy (wallet-only login)
 - **Blockchain**: Monad Testnet (Chain ID: 10143)
+- **Database**: Neon PostgreSQL (serverless PostgreSQL)
 - **Smart Contracts**: Hardhat, Solidity ^0.8.13
 - **Wallet Integration**: Wagmi, Viem
 
@@ -139,7 +140,8 @@ NEXT_PUBLIC_PRIVY_APP_ID=your_privy_app_id_here
 PRIVY_APP_SECRET=your_privy_app_secret_here
 
 # Database configuration (for production deployment)
-DATABASE_URL=your_postgresql_url_here
+# Uses Neon PostgreSQL (serverless PostgreSQL)
+DATABASE_URL=your_neon_postgresql_url_here
 ```
 
 ## Contributing
