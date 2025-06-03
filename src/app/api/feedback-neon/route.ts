@@ -92,24 +92,49 @@ export async function POST(request: NextRequest) {
     await initDatabase();
     
     if (newFeedback) {
-      // Insert feedback
-      const result = await sql`
-        INSERT INTO feedback (
-          feedback_text, 
-          category,
-          x_handle,
-          payment_amount, 
-          anonymous_timestamp
-        ) 
-        VALUES (
-          ${newFeedback.feedback},
-          ${newFeedback.category},
-          ${newFeedback.xHandle || null},
-          ${newFeedback.paymentAmount},
-          ${newFeedback.timestamp}
-        )
-        RETURNING id
-      `;
+      // Insert feedback with backward compatibility
+      let result;
+      try {
+        // Try with x_handle column first
+        result = await sql`
+          INSERT INTO feedback (
+            feedback_text, 
+            category,
+            x_handle,
+            payment_amount, 
+            anonymous_timestamp
+          ) 
+          VALUES (
+            ${newFeedback.feedback},
+            ${newFeedback.category},
+            ${newFeedback.xHandle || null},
+            ${newFeedback.paymentAmount},
+            ${newFeedback.timestamp}
+          )
+          RETURNING id
+        `;
+      } catch (error) {
+        // If x_handle column doesn't exist, insert without it
+        if (error instanceof Error && error.message.includes('x_handle')) {
+          result = await sql`
+            INSERT INTO feedback (
+              feedback_text, 
+              category,
+              payment_amount, 
+              anonymous_timestamp
+            ) 
+            VALUES (
+              ${newFeedback.feedback},
+              ${newFeedback.category},
+              ${newFeedback.paymentAmount},
+              ${newFeedback.timestamp}
+            )
+            RETURNING id
+          `;
+        } else {
+          throw error;
+        }
+      }
       
       const feedbackId = result[0].id;
       
