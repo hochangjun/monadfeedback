@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 interface FeedbackEntry {
   feedback: string;
   category: string;
+  xHandle?: string;
   timestamp: string;
   paymentAmount: string;
   id: string;
@@ -140,12 +141,13 @@ export default function AdminPage() {
   };
 
   const exportToCSV = () => {
-    const headers = ['Timestamp', 'Category', 'Feedback', 'Payment Amount', 'Feedback ID'];
+    const headers = ['Timestamp', 'Category', 'X Handle', 'Feedback', 'Payment Amount', 'Feedback ID'];
     const csvContent = [
       headers.join(','),
       ...filteredFeedback.map(feedback => [
         `"${formatDate(feedback.timestamp)}"`,
         `"${formatCategory(feedback.category)}"`,
+        `"${feedback.xHandle ? '@' + feedback.xHandle : ''}"`,
         `"${feedback.feedback.replace(/"/g, '""')}"`,
         feedback.paymentAmount,
         feedback.id ? feedback.id.slice(0, 8) : 'legacy'
@@ -259,10 +261,16 @@ export default function AdminPage() {
                         <Calendar className="h-4 w-4" />
                         <span>{formatDate(feedback.timestamp)}</span>
                       </div>
-                                             <span>•</span>
-                       <span>Payment: {feedback.paymentAmount} MON</span>
-                       <span>•</span>
-                       <span>ID: {feedback.id ? feedback.id.slice(0, 8) : 'legacy'}</span>
+                      {feedback.xHandle && (
+                        <>
+                          <span>•</span>
+                          <span className="text-purple-400">@{feedback.xHandle}</span>
+                        </>
+                      )}
+                      <span>•</span>
+                      <span>Payment: {feedback.paymentAmount} MON</span>
+                      <span>•</span>
+                      <span>ID: {feedback.id ? feedback.id.slice(0, 8) : 'legacy'}</span>
                     </div>
                   </div>
                 </div>

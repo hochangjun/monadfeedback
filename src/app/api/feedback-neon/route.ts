@@ -7,12 +7,17 @@ export async function GET() {
     // Ensure database is initialized
     await initDatabase();
     
+    if (!sql) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+    }
+    
     // Get all feedback (anonymous)
     const feedback = await sql`
       SELECT 
         id,
         feedback_text as feedback,
         category,
+        x_handle as "xHandle",
         payment_amount as "paymentAmount",
         anonymous_timestamp as timestamp
       FROM feedback 
@@ -43,6 +48,10 @@ export async function POST(request: NextRequest) {
     // Ensure database is initialized
     await initDatabase();
     
+    if (!sql) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+    }
+    
     const { feedback: newFeedback, userHistory: newHistory } = await request.json();
     
     if (newFeedback) {
@@ -50,13 +59,15 @@ export async function POST(request: NextRequest) {
       const result = await sql`
         INSERT INTO feedback (
           feedback_text, 
-          category, 
+          category,
+          x_handle,
           payment_amount, 
           anonymous_timestamp
         ) 
         VALUES (
           ${newFeedback.feedback},
           ${newFeedback.category},
+          ${newFeedback.xHandle || null},
           ${newFeedback.paymentAmount},
           ${newFeedback.timestamp}
         )

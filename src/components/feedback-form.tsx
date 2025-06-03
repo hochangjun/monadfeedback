@@ -60,6 +60,7 @@ export default function FeedbackForm() {
   const { wallets } = useWallets();
   const [selectedCategory, setSelectedCategory] = useState('');
   const [feedback, setFeedback] = useState('');
+  const [xHandle, setXHandle] = useState('');
   const [isPaymentLoading, setIsPaymentLoading] = useState(false);
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
   const [hasPaid, setHasPaid] = useState(false);
@@ -189,6 +190,7 @@ export default function FeedbackForm() {
       const feedbackData = {
         feedback: feedback.trim(),
         category: selectedCategory,
+        xHandle: xHandle.trim() || null, // Optional X handle (publicly shown if provided)
         timestamp: randomTimestamp, // Randomized timestamp for anonymity
         paymentAmount: FEEDBACK_COST_MON,
         id: crypto.randomUUID(), // Random UUID (already anonymous)
@@ -230,6 +232,7 @@ export default function FeedbackForm() {
       setShowSuccessModal(true);
       setFeedback('');
       setSelectedCategory('');
+      setXHandle('');
       setSubmitStatus('success');
       setCountdown(null);
       
@@ -389,6 +392,30 @@ export default function FeedbackForm() {
                   </option>
                 ))}
               </Select>
+            </div>
+
+            {/* Optional X Handle */}
+            <div className="space-y-3">
+              <label className="text-sm font-mono font-medium text-gray-700 dark:text-gray-300">
+                X Handle <span className="text-xs text-gray-500 dark:text-gray-400">(Optional - publicly shown)</span>
+              </label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 font-mono text-sm pointer-events-none">
+                  @
+                </div>
+                <input
+                  type="text"
+                  placeholder="your_handle (without @)"
+                  value={xHandle}
+                  onChange={(e) => setXHandle(e.target.value.replace(/^@/, ''))} // Remove @ if user types it
+                  disabled={!isFormEnabled}
+                  className="w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed font-mono text-sm"
+                  maxLength={15}
+                />
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                🔗 If provided, your X handle will be shown publicly with your feedback for attribution. Leave blank to remain completely anonymous.
+              </p>
             </div>
 
             {/* Feedback Textarea */}

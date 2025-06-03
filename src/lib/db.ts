@@ -1,10 +1,15 @@
 import { neon } from '@neondatabase/serverless';
 
-// Initialize database connection
-const sql = neon(process.env.DATABASE_URL!);
+// Initialize database connection with fallback for build time
+const sql = process.env.DATABASE_URL ? neon(process.env.DATABASE_URL) : null;
 
 // Database schema
 export const initDatabase = async () => {
+  if (!sql) {
+    console.log('No database URL provided, skipping database initialization');
+    return;
+  }
+  
   try {
     // Create feedback table
     await sql`
@@ -12,6 +17,7 @@ export const initDatabase = async () => {
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         feedback_text TEXT NOT NULL,
         category VARCHAR(100) NOT NULL,
+        x_handle VARCHAR(15),
         payment_amount VARCHAR(20) NOT NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         anonymous_timestamp TIMESTAMP WITH TIME ZONE NOT NULL

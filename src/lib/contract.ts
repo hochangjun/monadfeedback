@@ -13,7 +13,7 @@ const contractAddress: string | null =
   (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_CONTRACT_ADDRESS) || 
   '0x8f70dab45234aefc388a2d2df2144e2ae6bbb8d8'; // Deployed contract address
 
-export const FEEDBACK_COST_WEI = ethers.utils.parseEther('5'); // 5 MON in wei
+export const FEEDBACK_COST_WEI = ethers.utils.parseEther('1.1'); // 1.1 MON in wei
 
 export interface PaymentResult {
   success: boolean;

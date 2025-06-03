@@ -10,6 +10,7 @@ import { Calendar, Star, ExternalLink, AlertCircle } from 'lucide-react';
 interface FeedbackEntry {
   feedback: string;
   category: string;
+  xHandle?: string;
   timestamp: string;
   paymentAmount: string;
   id: string;
@@ -221,6 +222,11 @@ export default function FeedbackHistory() {
                         <Calendar className="h-4 w-4" />
                         <span>{formatDate(feedback.timestamp)}</span>
                       </div>
+                      {feedback.xHandle && (
+                        <div className="flex items-center space-x-1">
+                          <span className="text-purple-600 dark:text-purple-400">@{feedback.xHandle}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="text-right">

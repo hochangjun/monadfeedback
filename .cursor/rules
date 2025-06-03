@@ -1,0 +1,51 @@
+# Cursor AI Rules for Monad Feedback Project
+
+## Smart Contract Deployment Security Rules
+
+**CRITICAL SECURITY RULE:**
+- NEVER install Hardhat or any blockchain development dependencies in the main package.json
+- ALWAYS deploy smart contracts using Remix IDE for security reasons
+- NEVER auto-deploy contracts or suggest automated deployment
+- ALWAYS ask the user to manually deploy contracts via Remix
+
+### Contract Deployment Process:
+1. User copies contract code to Remix IDE (remix.ethereum.org)
+2. User manually compiles and deploys on Monad Testnet
+3. User provides the new contract address for frontend integration
+4. Assistant updates only the contract address in frontend code
+
+### Environment Variables:
+- Keep all sensitive data in environment variables
+- Never commit API keys, private keys, or secrets
+- Always use .env.example with placeholders
+- Verify .gitignore excludes all .env* files
+
+### Dependencies:
+- Keep frontend dependencies separate from blockchain dev tools
+- If contract development is needed, suggest separate project/folder
+- Maintain clean package.json focused on Next.js web app
+
+### Code Review:
+- Always check for hardcoded values before committing
+- Verify environment variable usage for sensitive config
+- Ensure proper error handling for blockchain interactions
+- Test build process before pushing changes
+
+## Development Guidelines
+
+### Database:
+- Use environment variables for database connections
+- Handle missing DATABASE_URL gracefully during build
+- Provide fallbacks for development vs production
+
+### UI/UX:
+- Maintain responsive design principles
+- Follow accessibility guidelines
+- Keep consistent theming (purple for this project)
+- Ensure wallet connection flows are smooth
+
+### Security Best Practices:
+- Validate all user inputs
+- Sanitize data before database storage
+- Use secure API patterns
+- Follow Web3 security guidelines 
