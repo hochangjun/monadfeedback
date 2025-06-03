@@ -265,7 +265,7 @@ export default function FeedbackForm() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* Hero Section */}
       <div className="max-w-4xl mx-auto px-6 py-12 pb-24">
         <div className="text-center mb-12">
@@ -307,7 +307,30 @@ export default function FeedbackForm() {
             )}
           </div>
 
-
+          <div className="p-6 space-y-6">
+            {/* Migration Notice */}
+            {showMigrationNotice && (
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400 mr-2" />
+                    <span className="text-sm text-blue-800 dark:text-blue-200 font-semibold">
+                      Data Migration Available
+                    </span>
+                  </div>
+                  <Button
+                    onClick={() => setShowMigrationNotice(false)}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    Dismiss
+                  </Button>
+                </div>
+                <p className="text-sm text-blue-700 dark:text-blue-300 mt-2">
+                  We've upgraded to a shared feedback system! Your existing feedback will be automatically migrated to the new system when you visit the admin page or submit new feedback.
+                </p>
+              </div>
+            )}
 
             {/* Payment Status */}
             {!hasPaid && (
